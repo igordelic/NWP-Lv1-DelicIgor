@@ -48,20 +48,20 @@ class DataManager
 
             $html = $this->htmlParser->load($result);
 
-            // find images url
+            
             foreach ($html->find('img') as $element) {
                 if (strpos($element, "logos") !== false) {
                     array_push($imagesUrl, $element->src);
                 }
             }
 
-            // find oibs
+            
             foreach ($imagesUrl as $image) {
                 $oibWithImageExtension = explode("logos/", $image);
                 array_push($oibs, substr($oibWithImageExtension[1], 0, 11));
             }
 
-            // find link & name
+  
             foreach ($html->find('a') as $element) {
                 array_push($hrefElements, $element->href);
                 array_push($titleElements, $element->plaintext);
@@ -71,8 +71,6 @@ class DataManager
             $hrefElements = $filtered[0];
             $titleElements = $filtered[1];
 
-            // find text
-            // save in DB
             for ($i = 0; $i < count($imagesUrl); $i++) {
                 array_push($textElements, $this->getText($hrefElements[$i]));
                 $this->diplomskiRadovi->create($titleElements[$i], $textElements[$i], $hrefElements[$i], $oibs[$i]);
@@ -82,31 +80,23 @@ class DataManager
     }
 
     private function filterHrefElements($hrefElements, $textElements) {
-        // remove unused elements
         for ($i = 0; $i <= 26; $i++) {
             unset($hrefElements[$i]);
             unset($textElements[$i]);
         }
-
-        // remove unused elements
         for ($i = 51; $i <= 61; $i++) {
             unset($hrefElements[$i]);
             unset($textElements[$i]);
         }
-
-        // reset indices
         $hrefElements = array_values($hrefElements);
         $textElements = array_values($textElements);
 
         $hrefFiltered = [];
         $textFiltered = [];
-
-        // filter unused elements
         for ($i = 0; $i < count($hrefElements) / 4; $i++) {
             $hrefFiltered[$i] = $hrefElements[$i * 4];
             $textFiltered[$i] = $textElements[$i * 4];
         }
-
         return array($hrefFiltered, $textFiltered);
     }
 
